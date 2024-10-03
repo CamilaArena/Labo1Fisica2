@@ -5,13 +5,32 @@ nx, ny = 101, 161  # Tamaño de la grilla
 tolerancia = 1e-3  # Tolerancia ε
 max_iter = 10000   # Número máximo de iteraciones
 
-# Inicializar el potencial con valores aleatorios entre -100 y 100
-potencial = np.random.uniform(-100, 100, (nx, ny))
+# Inicializar el potencial con ceros
+potencial = np.zeros((nx, ny))
 
-# Condiciones de Dirichlet en ciertos puntos de la grilla [fila,columna]
-potencial[40, 80] = 100  # Borne 1 con potencial de 100V
-potencial[30, 40] = -50  # Borne 2 con potencial de -50V
-potencial[70, 120] = 75  # Borne 3 con potencial de 75V
+# Crear una máscara para los bornes: 0 donde no hay borne, 1 donde hay borne
+mascara_bornes = np.zeros((nx, ny), dtype=bool)
+
+# Borne 1: Círculo centrado en (30, 30) con radio 10, potencial de 100V
+for i in range(nx):
+    for j in range(ny):
+        if (i - 30)**2 + (j - 30)**2 <= 10**2:
+            potencial[i, j] = 100  
+            mascara_bornes[i, j] = 1  # Marcamos la región del borne
+
+# Borne 2: Círculo centrado en (70, 30) con radio 10, potencial de -50V
+for i in range(nx):
+    for j in range(ny):
+        if (i - 70)**2 + (j - 30)**2 <= 10**2:
+            potencial[i, j] = -50  
+            mascara_bornes[i, j] = 1  
+
+# Borne 2: Círculo centrado en (50, 130) con radio 10, potencial de -70V
+for i in range(nx):
+    for j in range(ny):
+        if (i - 50)**2 + (j - 130)**2 <= 10**2:
+            potencial[i, j] = -70 
+            mascara_bornes[i, j] = 1  
 
 # Método de relajación
 def relajacion(potencial, max_iter, tolerancia):
@@ -20,8 +39,9 @@ def relajacion(potencial, max_iter, tolerancia):
         # Actualizar el potencial usando el promedio de los vecinos
         for i in range(1, nx - 1):
             for j in range(1, ny - 1):
-                potencial[i, j] = 0.25 * (potencial_old[i+1, j] + potencial_old[i-1, j] + 
-                                          potencial_old[i, j+1] + potencial_old[i, j-1])
+                if not mascara_bornes[i, j]:  # Solo actualizar si no es un punto de borne
+                    potencial[i, j] = 0.25 * (potencial_old[i+1, j] + potencial_old[i-1, j] + 
+                                            potencial_old[i, j+1] + potencial_old[i, j-1])
 
         # Condiciones de Neumann: derivada cero en los bordes
         potencial[:, 0] = potencial[:, 1]
@@ -44,12 +64,8 @@ plt.figure(figsize=(8, 6))
 
 vmin_pot = np.min(potencial)
 vmax_pot = np.max(potencial)
-print("Mínimo potencial:", np.min(potencial))
-print("Máximo potencial:", np.max(potencial))
 contour = plt.contourf(potencial.T, 100, cmap='viridis', vmin=vmin_pot, vmax=vmax_pot)  # Equipotenciales
 plt.colorbar(contour, label='Potencial (V)')  
-
-
 plt.title('Líneas Equipotenciales')
 plt.xlabel('x')
 plt.ylabel('y')
