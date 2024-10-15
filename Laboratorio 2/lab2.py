@@ -25,7 +25,7 @@ for i in range(nx):
             potencial[i, j] = -50  
             mascara_bornes[i, j] = 1  
 
-# Borne 2: Círculo centrado en (50, 130) con radio 10, potencial de -70V
+# Borne 3: Círculo centrado en (50, 130) con radio 10, potencial de -70V
 for i in range(nx):
     for j in range(ny):
         if (i - 50)**2 + (j - 130)**2 <= 10**2:
