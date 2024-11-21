@@ -2,11 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
-# Solicitar coordenadas al usuario
-x_user = float(input("Ingrese la coordenada x del punto de observación (en metros): "))
-y_user = float(input("Ingrese la coordenada y del punto de observación (en metros): "))
-z_user = float(input("Ingrese la coordenada z del punto de observación (en metros): "))
-
 # Constantes
 mu0 = 4 * np.pi * 1e-7  # Permeabilidad del vacío
 I2 = 1.0                # Corriente en amperios
@@ -22,10 +17,10 @@ def biot_savart_espira(x, y, z, N=500):
 
     Bx, By, Bz = 0, 0, 0
     for t in theta:
-        # Posición del elemento de corriente sobre la espira
+        # Posición del elemento de corriente sobre la espira, rotada para estar perpendicular al eje z
         r_prime = np.array([0, a * np.cos(t), a * np.sin(t)])  # Coordenadas de la espira en el plano xz
         # Elemento diferencial de corriente
-        dl = np.array([0, -a * np.sin(t), a * np.cos(t)]) * dtheta
+        dl = np.array([0, -a * np.sin(t), a * np.cos(t)]) * dtheta  # Diferencial de corriente
         # Punto de observación
         r = np.array([x, y, z])
         r_diff = r - r_prime
@@ -40,10 +35,10 @@ def biot_savart_espira(x, y, z, N=500):
 
     return np.array([Bx, By, Bz])
 
-# Gráfica 2D del campo magnético
+# Graficar el campo magnético en 2D
 x_range = np.linspace(-2, 2, 20)
 y_range = np.linspace(-2, 2, 20)
-z_plane = z_user  # Plano basado en el valor ingresado
+z_plane = 0.1  # Para evitar singularidades, alejar ligeramente del plano de la espira
 X, Y = np.meshgrid(x_range, y_range)
 
 Bx_plane = np.zeros(X.shape)
@@ -62,13 +57,32 @@ B_magnitude = np.sqrt(Bx_plane**2 + By_plane**2)
 plt.figure(figsize=(8, 6))
 plt.streamplot(X, Y, Bx_plane, By_plane, color=B_magnitude, cmap='viridis')
 plt.colorbar(label='|B| (T)')
-plt.plot([0, 0], [-a, a], color='red', linewidth=2, label='Espira')  # Representación de la espira en el eje Y
-plt.title(f'Campo magnético en el plano z = {z_plane:.2f}')
+# La espira ahora se ve como una recta a lo largo del eje y
+plt.plot([0, 0], [-a, a], color='red', linewidth=2, label='Espira')  # Recta en el eje Y
+plt.title('Campo magnético en el plano z')
 plt.xlabel('x (m)')
 plt.ylabel('y (m)')
 plt.legend()
 plt.grid()
 plt.show(block=False)
+
+# Graficar el campo magnético en 3D
+x_range_3d = np.linspace(-2, 2, 8)
+y_range_3d = np.linspace(-2, 2, 8)
+z_range_3d = np.linspace(-2, 2, 8)
+X3D, Y3D, Z3D = np.meshgrid(x_range_3d, y_range_3d, z_range_3d)
+
+Bx_3D = np.zeros(X3D.shape)
+By_3D = np.zeros(Y3D.shape)
+Bz_3D = np.zeros(Z3D.shape)
+
+for i in range(X3D.shape[0]):
+    for j in range(X3D.shape[1]):
+        for k in range(X3D.shape[2]):
+            B = biot_savart_espira(X3D[i, j, k], Y3D[i, j, k], Z3D[i, j, k])
+            Bx_3D[i, j, k] = B[0]
+            By_3D[i, j, k] = B[1]
+            Bz_3D[i, j, k] = B[2]
 
 # Gráfica 3D del campo magnético
 x_range_3d = np.linspace(-2, 2, 8)
@@ -117,6 +131,11 @@ ax.set_zlabel('z (m)')
 ax.legend()
 plt.show()
 
-# Calcular el campo en un punto específico
+# Calcular campo en un punto específico ingresado por el usuario
+print("\n--- Cálculo del campo magnético en un punto específico ---")
+x_user = float(input("Ingrese la coordenada x del punto de observación (en metros): "))
+y_user = float(input("Ingrese la coordenada y del punto de observación (en metros): "))
+z_user = float(input("Ingrese la coordenada z del punto de observación (en metros): "))
+
 B_point = biot_savart_espira(x_user, y_user, z_user)
-print(f"Campo magnético en ({x_user}, {y_user}, {z_user}): B = {B_point} T")
+print(f"\nCampo magnético en ({x_user}, {y_user}, {z_user}): B = {B_point} T")
