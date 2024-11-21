@@ -31,23 +31,10 @@ def biot_savart(x, y, z, N=1000):
 
     return np.array([Bx, By, Bz])
 
-# Pedir coordenadas al usuario
-try:
-    x1 = float(input("Ingrese la coordenada x del punto: "))
-    y1 = float(input("Ingrese la coordenada y del punto: "))
-    z1 = float(input("Ingrese la coordenada z del punto: "))
-except ValueError:
-    print("Por favor, ingrese valores numéricos válidos.")
-    exit()
-
-# Calcular campo magnético en el punto especificado
-B_point = biot_savart(x1, y1, z1)
-print(f"Campo magnético en ({x1}, {y1}, {z1}): B = {B_point} T")
-
 # Generar el campo magnético en un plano (2D gráfico)
 x_range = np.linspace(-1, 1, 20)
 y_range = np.linspace(-1, 1, 20)
-z_plane = z1  # Plano de observación con base en el punto ingresado
+z_plane = 0  # Plano de observación
 X, Y = np.meshgrid(x_range, y_range)
 
 Bx_plane = np.zeros(X.shape)
@@ -69,7 +56,7 @@ plt.figure(figsize=(8, 6))
 plt.streamplot(X, Y, Bx_plane, By_plane, color=B_magnitude, cmap='viridis')
 plt.colorbar(label='|B| (T)')
 plt.scatter(0, 0, color='red', s=100, label='Alambre (eje z)')
-plt.title(f'Campo magnético en el plano z = {z_plane}')
+plt.title('Campo magnético en el plano z = 0')
 plt.xlabel('x (m)')
 plt.ylabel('y (m)')
 plt.legend()
@@ -77,9 +64,9 @@ plt.grid()
 plt.show(block=False)
 
 # Generar el campo magnético en 3D
-x_range_3d = np.linspace(-1, 1, 10)
-y_range_3d = np.linspace(-1, 1, 10)
-z_range_3d = np.linspace(-L/2, L/2, 10)
+x_range_3d = np.linspace(-2, 2, 8)
+y_range_3d = np.linspace(-2, 2, 8)
+z_range_3d = np.linspace(-L/2, L/2, 8)
 X3D, Y3D, Z3D = np.meshgrid(x_range_3d, y_range_3d, z_range_3d)
 
 Bx_3D = np.zeros(X3D.shape)
@@ -106,7 +93,7 @@ ax = fig.add_subplot(111, projection='3d')
 ax.quiver(
     X3D, Y3D, Z3D, 
     Bx_3D, By_3D, Bz_3D, 
-    length=0.2, normalize=True, color='blue', alpha=0.8
+    length=0.5, normalize=True, color='blue', alpha=0.8
 )
 
 # Añadir alambre
@@ -122,3 +109,13 @@ ax.set_ylabel('y (m)')
 ax.set_zlabel('z (m)')
 ax.legend()
 plt.show()
+
+
+# Calcular campo en un punto específico ingresado por el usuario
+print("\n--- Cálculo del campo magnético en un punto específico ---")
+x_user = float(input("Ingrese la coordenada x del punto de observación (en metros): "))
+y_user = float(input("Ingrese la coordenada y del punto de observación (en metros): "))
+z_user = float(input("Ingrese la coordenada z del punto de observación (en metros): "))
+
+B_point = biot_savart(x_user, y_user, z_user)
+print(f"\nCampo magnético en ({x_user}, {y_user}, {z_user}): B = {B_point} T")
