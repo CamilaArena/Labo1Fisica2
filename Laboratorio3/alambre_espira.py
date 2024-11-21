@@ -6,8 +6,8 @@ from mpl_toolkits.mplot3d import Axes3D
 mu0 = 4 * np.pi * 1e-7  # Permeabilidad del vacío
 I_alambre = 1.0         # Corriente en el alambre (A)
 I_espira = 1.0          # Corriente en la espira (A)
-L = 4.0                 # Longitud del alambre (m), ajustada para ser más larga que la espira
-a = 0.5                 # Radio de la espira reducido (m)
+L = 4.0                 # Longitud del alambre (m)
+a = 0.5                 # Radio de la espira (m)
 
 # Función para calcular el campo magnético por un alambre recto
 def biot_savart_alambre(x, y, z, N=1000):
@@ -78,13 +78,14 @@ ax = fig.add_subplot(111, projection='3d')
 # Añadir vectores de campo magnético con flechas más largas
 ax.quiver(X3D, Y3D, Z3D, Bx_3D, By_3D, Bz_3D, length=0.3, normalize=True, color='blue', alpha=0.7)
 
-# Añadir la espira
+# Añadir la espira en el plano xy
 theta = np.linspace(0, 2 * np.pi, 100)
 x_circle = a * np.cos(theta)
-z_circle = a * np.sin(theta)
-ax.plot(x_circle, [0] * len(theta), z_circle, color='orange', linewidth=3, label='Espira')
+y_circle = a * np.sin(theta)
+z_circle = np.zeros_like(theta)
+ax.plot(x_circle, y_circle, z_circle, color='orange', linewidth=3, label='Espira')
 
-# Añadir el alambre
+# Añadir el alambre en el eje z
 z_line = np.linspace(-L/2, L/2, 100)
 ax.plot([0] * len(z_line), [0] * len(z_line), z_line, color='red', linewidth=3, label='Alambre')
 
@@ -94,4 +95,20 @@ ax.set_xlabel('x (m)')
 ax.set_ylabel('y (m)')
 ax.set_zlabel('z (m)')
 ax.legend()
+
+# Solicitar al usuario el punto
+punto_x = float(input("Ingrese la coordenada x del punto: "))
+punto_y = float(input("Ingrese la coordenada y del punto: "))
+punto_z = float(input("Ingrese la coordenada z del punto: "))
+
+# Cálculo en el punto ingresado por el usuario
+B_punto_alambre = biot_savart_alambre(punto_x, punto_y, punto_z)
+B_punto_espira = biot_savart_espira(punto_x, punto_y, punto_z)
+B_punto_total = B_punto_alambre + B_punto_espira
+
+print(f"\nCampo magnético en el punto ({punto_x}, {punto_y}, {punto_z}):")
+print(f"  Contribución del alambre: {B_punto_alambre}")
+print(f"  Contribución de la espira: {B_punto_espira}")
+print(f"  Campo magnético total: {B_punto_total}")
+
 plt.show()
